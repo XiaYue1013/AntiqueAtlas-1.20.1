@@ -1,0 +1,99 @@
+jarJar.enable()
+project.ext._mod_jar = tasks.named('jarJar').get()
+
+// The plain archive is for development; ship the archive with runtime libraries.
+tasks.named('jar').configure { archiveClassifier = 'unbundled' }
+tasks.named('jarJar').configure {
+    archiveClassifier = ''
+    manifest.from(tasks.named('jar').get().manifest)
+}
+
+mixin {
+    add sourceSets.main, "${_mod_id}.refmap.json"
+    config "${_mod_id}.mixins.json"
+}
+
+minecraft {
+    mappings channel: mappingsChannel, version: mappingsVersion
+    //reobf = false
+    copyIdeResources = true
+    //makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+    runs {
+        client {
+            workingDirectory project.file("run/${project._loader}-Client")
+            property 'forge.logging.markers', 'REGISTRIES'
+			arg "-mixin.config=${_mod_id}.mixins.json"
+            property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+			property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+            mods {
+                "${_mod_id}" {
+                    source sourceSets.main
+                    if (project.hasProperty('bugfixClientTest')) source sourceSets.test
+                }
+            }
+            if (project.hasProperty('bugfixClientTest')) {
+                property 'antiqueatlas.testClient', 'true'
+                args '--username', 'AtlasRegression', '--width', '1280', '--height', '800'
+            }
+            if (project.hasProperty('bugfixCherryTest')) property 'antiqueatlas.testCherryOnly', 'true'
+        }
+
+        server {
+            workingDirectory project.file("run/${project._loader}-Server")
+            if (project.hasProperty('bugfixMissingDependency')) workingDirectory project.file('run/Forge-MissingDependency')
+            property 'forge.logging.markers', 'REGISTRIES'
+			arg "-mixin.config=${_mod_id}.mixins.json"
+            property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+            args '--nogui'
+            mods {
+                "${_mod_id}" {
+                    source sourceSets.main
+                    if (project.hasProperty('bugfixServerTest')) source sourceSets.test
+                }
+            }
+            if (project.hasProperty('bugfixServerTest')) property 'antiqueatlas.testServer', 'true'
+        }
+
+        gameTestServer {
+            workingDirectory project.file('run/Forge-GameTest')
+            property 'forge.enabledGameTestNamespaces', 'antiqueatlas'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+            mods {
+                antiqueatlas {
+                    source sourceSets.main
+                    source sourceSets.test
+                }
+            }
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes([
+            "Specification-Title": _mod_name,
+            "Specification-Vendor": "Stereowalker",
+            "Specification-Version": "1",
+            "Implementation-Title": project.name,
+            "Implementation-Version": "${version}",
+            "Implementation-Vendor" :"Stereowalker",
+            "MixinConfigs": _mod_id+".mixins.json",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+eclipse {
+    synchronizationTasks 'genEclipseRuns'
+}
+
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
+}

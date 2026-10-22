@@ -1,0 +1,47 @@
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea
+
+# gradle
+build
+.gradle
+!build.gradle
+
+# other
+eclipse
+run*
+
+classes
+logs
+
+# Local bugfix evidence and downloaded inspection artifacts
+/audit/
+/*.log
+/github-issues*.json
+/tests/__pycache__/
+BUGFIX_PROGRESS.md
+BUGFIX_REPORT.md
+TEST_RESULTS.md
+
+/.github
+
+/.idea
+
+/changelog.md
+
+/full_changelog.txt
+
+/javax
+/remappedSrc
+/tests

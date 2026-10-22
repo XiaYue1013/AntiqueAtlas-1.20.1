@@ -1,0 +1,8 @@
+TOMLJ 1.0.0 (org.tomlj:tomlj)
+Upstream: https://github.com/tomlj/tomlj
+License: Apache License, Version 2.0
+License text: META-INF/licenses/tomlj-LICENSE.txt
+
+The unmodified TOMLJ runtime is included using Forge Jar-in-Jar because
+UnionLib's configuration reader requires it in installed game instances.
+Antique Atlas's original GPL license and copyright notices are unchanged.

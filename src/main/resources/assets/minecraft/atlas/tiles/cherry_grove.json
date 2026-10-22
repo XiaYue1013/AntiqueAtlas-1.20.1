@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "texture_sets": {
+    "default": "antiqueatlas:forest_flowers",
+    "mid": "antiqueatlas:forest_hills",
+    "high": "antiqueatlas:forest_hills",
+    "peak": "antiqueatlas:forest_hills"
+  }
+}
